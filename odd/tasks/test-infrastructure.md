@@ -73,7 +73,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Runtime harness: N/A — this work unit establishes package-level test and type contracts without a deployable runtime.
   - Lockfile: `pnpm install` completed for all four workspace projects with one existing backend TypeScript peer warning; the redundant frontend lockfile was removed.
   - Rollback boundary: revert the root manifest, root lockfile, domain package/configuration/source, and redundant frontend lockfile removal without affecting backend or frontend source.
-  - Commit: pending creation (`test(domain): establish workspace test foundation`).
+  - Commit: `f4d83f31a461` (`test(domain): establish workspace test foundation`).
 
 - [ ] **TST-002 — Unify backend tests under Vitest**
   - Route: delegated.

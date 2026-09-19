@@ -64,13 +64,16 @@ A reliable workspace-wide test contract is required before product features begi
   - Rollback boundary: restore `.gitignore` and the removed `node_modules/` index entries without changing local dependency files.
   - Commit: `091e92ebccbc` (`chore(repo): stop tracking generated dependencies`).
 
-- [ ] **TST-001 — Establish workspace and domain test foundation**
+- [x] **TST-001 — Establish workspace and domain test foundation**
   - Route: delegated.
   - Trigger: preparation and implementation span multiple non-trivial files.
   - Configure the root test command and domain TypeScript/Vitest package contract.
   - Ensure the domain remains free of app/framework dependencies.
-  - Verification: domain tests, domain typecheck, and root recursive test discovery.
-  - Commit: pending.
+  - Verification: `pnpm --filter @tiza/domain test` passed 1 file and 2 tests with Vitest 4.1.11; `pnpm --filter @tiza/domain typecheck` exited 0; `pnpm test` exited 0 and recursively ran the domain and current backend test scripts.
+  - Runtime harness: N/A — this work unit establishes package-level test and type contracts without a deployable runtime.
+  - Lockfile: `pnpm install` completed for all four workspace projects with one existing backend TypeScript peer warning; the redundant frontend lockfile was removed.
+  - Rollback boundary: revert the root manifest, root lockfile, domain package/configuration/source, and redundant frontend lockfile removal without affecting backend or frontend source.
+  - Commit: pending creation (`test(domain): establish workspace test foundation`).
 
 - [ ] **TST-002 — Unify backend tests under Vitest**
   - Route: delegated.
@@ -115,7 +118,8 @@ A reliable workspace-wide test contract is required before product features begi
 ## Verification Evidence
 
 - TST-000: repository hygiene verified before commit. Git tracks zero `node_modules/` paths, all 32,151 prior paths are staged as cached removals, and the local pnpm dependency metadata remains present.
+- TST-001: domain Vitest behavior (2 tests), domain typecheck, workspace recursive test execution, and root lockfile installation passed. The install reported the pre-existing `vite-tsconfig-paths` peer range warning against backend TypeScript 6.0.3.
 
 ## Next Step
 
-Implement TST-001 after recording the TST-000 commit identity.
+Implement TST-002 after recording the TST-001 commit identity.

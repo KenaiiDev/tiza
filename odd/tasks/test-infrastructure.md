@@ -40,10 +40,10 @@ A reliable workspace-wide test contract is required before product features begi
 
 ## TDD Configuration
 
-- Current mode: disabled.
-- Source: `sdd/tiza/testing-capabilities` baseline.
-- Reason: no workspace-wide test command currently covers every package.
-- Target runner: `pnpm test`, delegating to Vitest in every package.
+- Current mode: enabled for future feature work.
+- Source: this ODD change, verified by the TST-004 workspace contract.
+- Runner: `pnpm test`, delegating to Vitest in every package.
+- Setup evidence: ordinary functional verification only; this infrastructure change does not claim strict RED/GREEN evidence for its own creation.
 
 ## Delivery
 
@@ -97,13 +97,17 @@ A reliable workspace-wide test contract is required before product features begi
   - Rollback boundary: revert frontend Storybook/Vitest config, component/story, package scripts/dependencies, and matching root lockfile entries; the external browser cache can be removed independently.
   - Commit: `101d075eabfb` (`test(frontend): add Vitest and Storybook browser tests`).
 
-- [ ] **TST-004 — Verify the workspace TDD contract**
+- [x] **TST-004 — Verify the workspace TDD contract**
   - Route: delegated.
   - Trigger: cross-package verification and lockfile normalization require repository-wide context.
   - Confirm `pnpm test` executes Vitest for backend, frontend, and domain; verify builds and record any environmental prerequisite.
   - Remove temporary no-test allowances once every package has a real test.
-  - Verification: clean install compatibility, workspace tests, package builds, and structural readback.
-  - Commit: pending.
+  - Verification: all required install, package test, lint, typecheck, build, root test, frozen-install, and structural commands passed after excluding generated `storybook-static/` output from ESLint.
+  - Runtime harness: root `pnpm test` ran domain (1 file/2 tests), backend (2 files/2 tests), and frontend Storybook Chromium coverage (1 file/1 test) and exited 0.
+  - Temporary allowances: none; no `passWithNoTests` setting remains and every package has a real Vitest test.
+  - Rollback boundary: revert the final ESLint generated-output ignore and this verification evidence independently; capability rollback boundaries remain listed on TST-000 through TST-003.
+  - Authored-line estimate: 394 lines before this final evidence update, excluding generated lockfiles and all dependency index removals; the final count is recorded below.
+  - Commit: pending creation (`docs(testing): record workspace verification contract`).
 
 ## Acceptance Criteria
 
@@ -128,7 +132,41 @@ A reliable workspace-wide test contract is required before product features begi
 - TST-001: domain Vitest behavior (2 tests), domain typecheck, workspace recursive test execution, and root lockfile installation passed. The install reported the pre-existing `vite-tsconfig-paths` peer range warning against backend TypeScript 6.0.3.
 - TST-002: backend unit, combined default, focused integration, lint, and build commands all passed; the dependency reinstall removed the TypeScript peer warning.
 - TST-003: frontend browser story tests, Storybook production build, lint, typecheck, and Next.js production build passed with the documented non-failing build warnings.
+- TST-004: full workspace verification passed. The first frontend lint attempt exposed generated Storybook output because ESLint did not ignore `storybook-static/`; adding the generated-output ignore fixed the failure without weakening source linting.
+
+### Final Command Results
+
+| Command | Observed result |
+| --- | --- |
+| `pnpm install` | Passed for all 4 workspace projects; lockfile was current. pnpm reported ignored `esbuild@0.27.7` and `esbuild@0.28.2` build scripts. |
+| `pnpm --filter @tiza/domain test` | Passed: Vitest 4.1.11, 1 file, 2 tests. |
+| `pnpm --filter @tiza/domain typecheck` | Passed: `tsc --noEmit` exited 0. |
+| `pnpm --filter backend test` | Passed: Vitest 4.1.11, 2 files, 2 tests. |
+| `pnpm --filter backend test:e2e` | Passed: Vitest 4.1.11, 1 file, 1 test. |
+| `pnpm --filter backend lint` | Passed: type-aware oxlint exited 0. |
+| `pnpm --filter backend build` | Passed: `nest build` exited 0. |
+| `pnpm --filter frontend test` | Passed: Vitest 4.1.11, 1 Chromium story file, 1 test. |
+| `pnpm --filter frontend build-storybook` | Passed with Storybook 10.2.9 and Vite 7.3.6; non-failing `use client` sourcemap/directive and chunk-size warnings remained. |
+| `pnpm --filter frontend lint` | Passed after `storybook-static/**` was added to ESLint global ignores; the initial attempt failed only on generated Storybook bundles. |
+| `pnpm --filter frontend typecheck` | Passed: `tsc --noEmit` exited 0. |
+| `pnpm --filter frontend build` | Passed: Next.js 16.3.5 compiled, typechecked, and generated 4 static pages. |
+| `pnpm test` | Passed all package scripts: domain 1 file/2 tests, backend 2 files/2 tests, frontend 1 file/1 browser test. |
+| `pnpm install --frozen-lockfile` | Passed; lockfile was current. pnpm repeated the ignored esbuild build-script warning. |
+| Structural checks | Passed: zero tracked root or nested `node_modules/` paths, local package dependencies present, exactly one tracked root `pnpm-lock.yaml`, and every package `test` script is `vitest run`. |
+
+### Rollback Boundaries
+
+- Repository hygiene: restore `.gitignore` and dependency index entries only; local dependencies are independent.
+- Domain foundation: revert the root test script, domain package/configuration/source, lockfile entries, and deleted frontend lockfile.
+- Backend coverage: revert backend scripts/configuration and native tsconfig-path resolution dependency changes.
+- Frontend coverage: revert Storybook/Vitest configuration, the notice component/story, package scripts/dependencies, lockfile entries, and ESLint generated-output ignore; remove the external Playwright browser cache separately if desired.
+
+### Review Size
+
+- Authored additions plus deletions: 432 (417 additions, 15 deletions).
+- Exclusions: generated root/frontend lockfile changes and all root/nested `node_modules/` index removals.
+- The 400-line guideline remains advisory; no code, tests, configuration, or evidence was omitted to reduce the count.
 
 ## Next Step
 
-Implement TST-004 after recording the TST-003 commit identity.
+Review the branch locally. Push, pull request creation, and merge remain human decisions and were not performed.

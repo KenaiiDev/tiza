@@ -62,7 +62,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Verification: `git ls-files 'node_modules/**' | wc -l` returned `0`; the staged cached removals contained `32151` paths; `node_modules/.modules.yaml` remained present locally.
   - Runtime harness: N/A — repository hygiene has no runtime boundary.
   - Rollback boundary: restore `.gitignore` and the removed `node_modules/` index entries without changing local dependency files.
-  - Commit: pending creation (`chore(repo): stop tracking generated dependencies`).
+  - Commit: `091e92ebccbc` (`chore(repo): stop tracking generated dependencies`).
 
 - [ ] **TST-001 — Establish workspace and domain test foundation**
   - Route: delegated.

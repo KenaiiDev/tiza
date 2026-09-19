@@ -107,7 +107,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Temporary allowances: none; no `passWithNoTests` setting remains and every package has a real Vitest test.
   - Rollback boundary: revert the final ESLint generated-output ignore and this verification evidence independently; capability rollback boundaries remain listed on TST-000 through TST-003.
   - Authored-line estimate: 394 lines before this final evidence update, excluding generated lockfiles and all dependency index removals; the final count is recorded below.
-  - Commit: pending creation (`docs(testing): record workspace verification contract`).
+  - Commit: `5318dbc4443c` (`docs(testing): record workspace verification contract`).
 
 ## Acceptance Criteria
 

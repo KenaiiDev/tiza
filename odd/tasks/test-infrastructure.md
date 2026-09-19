@@ -85,13 +85,17 @@ A reliable workspace-wide test contract is required before product features begi
   - Rollback boundary: revert backend scripts, both Vitest configs, the backend dependency removal, and matching root lockfile entries.
   - Commit: `5e6816d70527` (`test(backend): include integration tests by default`).
 
-- [ ] **TST-003 — Add frontend Vitest and Storybook testing**
+- [x] **TST-003 — Add frontend Vitest and Storybook testing**
   - Route: delegated.
   - Trigger: Storybook, Vitest browser mode, package scripts, and representative stories span multiple files.
   - Configure Storybook with `@storybook/nextjs-vite`, Vitest integration, Playwright Chromium, Tailwind globals, and App Router support.
   - Add a minimal representative component boundary with a behavioral story/test instead of generated demo content.
-  - Verification: frontend tests, Storybook build, frontend lint, typecheck/build.
-  - Commit: pending.
+  - Verification: `pnpm --filter frontend test` and `test:storybook` each passed 1 browser story test with Vitest 4.1.11 and Chromium; `build-storybook` completed with Storybook 10.2.9/Vite 7.3.6; frontend lint, typecheck, and Next.js production build exited 0.
+  - Runtime harness: the Storybook play test rendered the interactive notice in Chromium, clicked its accessible dismiss button, and observed that the status region was removed.
+  - Environment: `pnpm --filter frontend exec playwright install chromium` installed Playwright Chromium 1243 and its headless shell using the Ubuntu 24.04 fallback build because the host OS is not officially supported.
+  - Build notes: Storybook reported non-failing warnings for the ignored bundled `use client` directive and a chunk above 500 kB; no generated demo components or assets were added.
+  - Rollback boundary: revert frontend Storybook/Vitest config, component/story, package scripts/dependencies, and matching root lockfile entries; the external browser cache can be removed independently.
+  - Commit: pending creation (`test(frontend): add Vitest and Storybook browser tests`).
 
 - [ ] **TST-004 — Verify the workspace TDD contract**
   - Route: delegated.
@@ -123,7 +127,8 @@ A reliable workspace-wide test contract is required before product features begi
 - TST-000: repository hygiene verified. Git tracks zero root or nested `node_modules/` paths; 32,151 root paths and 30 nested backend paths were removed with local dependencies retained.
 - TST-001: domain Vitest behavior (2 tests), domain typecheck, workspace recursive test execution, and root lockfile installation passed. The install reported the pre-existing `vite-tsconfig-paths` peer range warning against backend TypeScript 6.0.3.
 - TST-002: backend unit, combined default, focused integration, lint, and build commands all passed; the dependency reinstall removed the TypeScript peer warning.
+- TST-003: frontend browser story tests, Storybook production build, lint, typecheck, and Next.js production build passed with the documented non-failing build warnings.
 
 ## Next Step
 
-Implement TST-003 after recording the TST-002 commit identity.
+Implement TST-004 after recording the TST-003 commit identity.

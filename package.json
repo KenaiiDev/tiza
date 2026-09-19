@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "pnpm --recursive --no-bail test"
+    "test": "pnpm --recursive --no-bail exec pnpm run test"
   },
   "keywords": [],
   "author": "",

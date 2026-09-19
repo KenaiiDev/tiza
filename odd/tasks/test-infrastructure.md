@@ -41,7 +41,7 @@ A reliable workspace-wide test contract is required before product features begi
 ## TDD Configuration
 
 - Current mode: enabled for future feature work.
-- Source: this ODD change, verified by the TST-004 workspace contract.
+- Source: this ODD change, verified by the fail-closed TST-005 workspace contract.
 - Runner: `pnpm test`, delegating to Vitest in every package.
 - Setup evidence: ordinary functional verification only; this infrastructure change does not claim strict RED/GREEN evidence for its own creation.
 
@@ -109,9 +109,22 @@ A reliable workspace-wide test contract is required before product features begi
   - Authored-line estimate: 394 lines before this final evidence update, excluding generated lockfiles and all dependency index removals; the final count is recorded below.
   - Commit: `5318dbc4443c` (`docs(testing): record workspace verification contract`).
 
+- [x] **TST-005 — Make the root test command fail closed**
+  - Route: direct bounded correction.
+  - Trigger: independent verification proved that `pnpm --recursive --no-bail test` silently skipped a workspace child without a `test` script and exited 0, so TST-004 did not fully enforce the workspace contract.
+  - Replace the recursive lifecycle invocation with `pnpm --recursive --no-bail exec pnpm run test`, preserving `--no-bail` coverage while requiring every selected child package to provide a `test` script.
+  - RED evidence: the previous root command skipped a bounded workspace child without a `test` script and exited 0 during independent verification.
+  - GREEN verification: with temporary `packages/__missing-test-probe/package.json` present and no `test` script, `pnpm test` ran all three real package suites, reported `ERR_PNPM_NO_SCRIPT` and a summary of 1 failure/3 passes, and exited 1.
+  - Regression verification: after removing the probe completely, `pnpm test` exited 0; domain passed 1 file/2 tests, backend passed 2 files/2 tests, and frontend passed 1 Chromium story file/1 test.
+  - Structural verification: all 3 current workspace children expose `test: vitest run`; the temporary probe is absent; the ODD document contains zero NUL bytes; only `package.json` and this document remain in the correction work unit.
+  - Runtime harness: N/A — this correction enforces the workspace test-command boundary and does not change a deployable runtime path.
+  - Rollback boundary: revert only the root `package.json` test command and this TST-005 evidence; no package tests, dependencies, lockfiles, or runtime code are part of the correction.
+  - Commit: closed by the `fix(testing): make workspace tests fail closed` work-unit commit containing this correction and its evidence.
+
 ## Acceptance Criteria
 
 - `pnpm test` runs all package test suites and succeeds.
+- `pnpm test` exits nonzero if any current workspace child lacks a `test` script.
 - Every package test script invokes Vitest; no Jest or Node test runner is introduced.
 - Backend default tests include both unit and in-process HTTP integration coverage.
 - Domain has a functioning framework-free TypeScript/Vitest setup and at least one meaningful behavioral test.
@@ -132,7 +145,8 @@ A reliable workspace-wide test contract is required before product features begi
 - TST-001: domain Vitest behavior (2 tests), domain typecheck, workspace recursive test execution, and root lockfile installation passed. The install reported the pre-existing `vite-tsconfig-paths` peer range warning against backend TypeScript 6.0.3.
 - TST-002: backend unit, combined default, focused integration, lint, and build commands all passed; the dependency reinstall removed the TypeScript peer warning.
 - TST-003: frontend browser story tests, Storybook production build, lint, typecheck, and Next.js production build passed with the documented non-failing build warnings.
-- TST-004: full workspace verification passed. The first frontend lint attempt exposed generated Storybook output because ESLint did not ignore `storybook-static/`; adding the generated-output ignore fixed the failure without weakening source linting.
+- TST-004: the recorded package suites passed, but later independent verification found that its root command silently skipped workspace children without a `test` script; TST-005 closes that fail-open gap.
+- TST-005: the corrected root command failed closed with exit 1 for a temporary child lacking `test`, then passed all real package suites after the probe was removed.
 
 ### Final Command Results
 
@@ -150,9 +164,10 @@ A reliable workspace-wide test contract is required before product features begi
 | `pnpm --filter frontend lint` | Passed after `storybook-static/**` was added to ESLint global ignores; the initial attempt failed only on generated Storybook bundles. |
 | `pnpm --filter frontend typecheck` | Passed: `tsc --noEmit` exited 0. |
 | `pnpm --filter frontend build` | Passed: Next.js 16.3.5 compiled, typechecked, and generated 4 static pages. |
-| `pnpm test` | Passed all package scripts: domain 1 file/2 tests, backend 2 files/2 tests, frontend 1 file/1 browser test. |
+| `pnpm test` | Passed with the corrected fail-closed command: domain 1 file/2 tests, backend 2 files/2 tests, frontend 1 file/1 Chromium story test. |
+| `pnpm test` with temporary missing-script child | Failed as required with exit 1, `ERR_PNPM_NO_SCRIPT`, and recursive summary 1 failure/3 passes; the probe was then removed completely. |
 | `pnpm install --frozen-lockfile` | Passed; lockfile was current. pnpm repeated the ignored esbuild build-script warning. |
-| Structural checks | Passed: zero tracked root or nested `node_modules/` paths, local package dependencies present, exactly one tracked root `pnpm-lock.yaml`, and every package `test` script is `vitest run`. |
+| Structural checks | Passed: all 3 workspace children use `test: vitest run`, the temporary probe is absent, the ODD document has zero NUL bytes, and the correction contains only `package.json` plus this document. |
 
 ### Rollback Boundaries
 
@@ -163,10 +178,10 @@ A reliable workspace-wide test contract is required before product features begi
 
 ### Review Size
 
-- Authored additions plus deletions: 432 (417 additions, 15 deletions).
-- Exclusions: generated root/frontend lockfile changes and all root/nested `node_modules/` index removals.
-- The 400-line guideline remains advisory; no code, tests, configuration, or evidence was omitted to reduce the count.
+- Through TST-004: 432 authored changes (417 additions, 15 deletions), excluding generated lockfiles and dependency index removals.
+- TST-005 correction: 33 authored changes (24 additions, 9 deletions) across the root manifest and this evidence.
+- Cumulative authored changes: 465. The 400-line guideline remains advisory; no code, tests, configuration, or evidence was omitted to reduce the count.
 
 ## Next Step
 
-Review the branch locally. Push, pull request creation, and merge remain human decisions and were not performed.
+The fail-closed correction is implemented and verified. Review its work-unit commit locally; no ODD implementation issue remains. Push, pull request creation, and merge remain human decisions and were not performed.

@@ -95,7 +95,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Environment: `pnpm --filter frontend exec playwright install chromium` installed Playwright Chromium 1243 and its headless shell using the Ubuntu 24.04 fallback build because the host OS is not officially supported.
   - Build notes: Storybook reported non-failing warnings for the ignored bundled `use client` directive and a chunk above 500 kB; no generated demo components or assets were added.
   - Rollback boundary: revert frontend Storybook/Vitest config, component/story, package scripts/dependencies, and matching root lockfile entries; the external browser cache can be removed independently.
-  - Commit: pending creation (`test(frontend): add Vitest and Storybook browser tests`).
+  - Commit: `101d075eabfb` (`test(frontend): add Vitest and Storybook browser tests`).
 
 - [ ] **TST-004 — Verify the workspace TDD contract**
   - Route: delegated.

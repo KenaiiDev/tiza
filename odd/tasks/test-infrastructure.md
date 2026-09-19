@@ -59,10 +59,10 @@ A reliable workspace-wide test contract is required before product features begi
   - Trigger: repository-wide tracked generated files must be cleaned before dependency installation.
   - Add dependency/build output ignores and remove the 32,151 tracked `node_modules/` files from the Git index without deleting local files.
   - Verification: Git tracks no `node_modules/` path; local dependencies remain available; the worktree contains only the expected index removals and task/ignore changes.
-  - Verification: `git ls-files 'node_modules/**' | wc -l` returned `0`; the staged cached removals contained `32151` paths; `node_modules/.modules.yaml` remained present locally.
+  - Verification: `git ls-files 'node_modules/**' | wc -l` and `git ls-files '**/node_modules/**' | wc -l` both returned `0`; 32,151 root paths and 30 nested backend paths were removed from the index; local root and backend dependencies remained present.
   - Runtime harness: N/A — repository hygiene has no runtime boundary.
   - Rollback boundary: restore `.gitignore` and the removed `node_modules/` index entries without changing local dependency files.
-  - Commit: `091e92ebccbc` (`chore(repo): stop tracking generated dependencies`).
+  - Commits: `091e92ebccbc` (`chore(repo): stop tracking generated dependencies`) and corrective `1e2d3fb3d922` (`chore(repo): untrack nested dependencies`).
 
 - [x] **TST-001 — Establish workspace and domain test foundation**
   - Route: delegated.
@@ -75,12 +75,15 @@ A reliable workspace-wide test contract is required before product features begi
   - Rollback boundary: revert the root manifest, root lockfile, domain package/configuration/source, and redundant frontend lockfile removal without affecting backend or frontend source.
   - Commit: `f4d83f31a461` (`test(domain): establish workspace test foundation`).
 
-- [ ] **TST-002 — Unify backend tests under Vitest**
+- [x] **TST-002 — Unify backend tests under Vitest**
   - Route: delegated.
   - Trigger: test configuration and scripts require coordinated edits.
   - Make the default backend test command cover unit and integration tests while retaining useful focused commands.
-  - Verification: backend unit/default tests, focused integration tests, lint, and build.
-  - Commit: pending.
+  - Verification: `pnpm --filter backend test:unit` passed 1 file/1 test; `pnpm --filter backend test` passed 2 files/2 tests, including `test/**/*.e2e-spec.ts`; `pnpm --filter backend test:e2e` passed 1 file/1 test; backend lint and build exited 0.
+  - Runtime harness: the focused `test:e2e` Vitest/Supertest in-process HTTP test passed.
+  - Dependency result: `pnpm install` exited 0 without peer warnings after replacing `vite-tsconfig-paths` with Vite's native `resolve.tsconfigPaths` support.
+  - Rollback boundary: revert backend scripts, both Vitest configs, the backend dependency removal, and matching root lockfile entries.
+  - Commit: pending creation (`test(backend): include integration tests by default`).
 
 - [ ] **TST-003 — Add frontend Vitest and Storybook testing**
   - Route: delegated.
@@ -117,9 +120,10 @@ A reliable workspace-wide test contract is required before product features begi
 
 ## Verification Evidence
 
-- TST-000: repository hygiene verified before commit. Git tracks zero `node_modules/` paths, all 32,151 prior paths are staged as cached removals, and the local pnpm dependency metadata remains present.
+- TST-000: repository hygiene verified. Git tracks zero root or nested `node_modules/` paths; 32,151 root paths and 30 nested backend paths were removed with local dependencies retained.
 - TST-001: domain Vitest behavior (2 tests), domain typecheck, workspace recursive test execution, and root lockfile installation passed. The install reported the pre-existing `vite-tsconfig-paths` peer range warning against backend TypeScript 6.0.3.
+- TST-002: backend unit, combined default, focused integration, lint, and build commands all passed; the dependency reinstall removed the TypeScript peer warning.
 
 ## Next Step
 
-Implement TST-002 after recording the TST-001 commit identity.
+Implement TST-003 after recording the TST-002 commit identity.

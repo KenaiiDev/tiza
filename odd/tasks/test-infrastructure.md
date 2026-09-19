@@ -83,7 +83,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Runtime harness: the focused `test:e2e` Vitest/Supertest in-process HTTP test passed.
   - Dependency result: `pnpm install` exited 0 without peer warnings after replacing `vite-tsconfig-paths` with Vite's native `resolve.tsconfigPaths` support.
   - Rollback boundary: revert backend scripts, both Vitest configs, the backend dependency removal, and matching root lockfile entries.
-  - Commit: pending creation (`test(backend): include integration tests by default`).
+  - Commit: `5e6816d70527` (`test(backend): include integration tests by default`).
 
 - [ ] **TST-003 — Add frontend Vitest and Storybook testing**
   - Route: delegated.

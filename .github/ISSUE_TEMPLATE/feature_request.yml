@@ -1,0 +1,42 @@
+name: Feature request
+description: Propose a new feature or capability
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: What problem or gap does this feature address?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How should the feature behave?
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Which part of the workspace is affected?
+      multiple: true
+      options:
+        - Domain
+        - Backend
+        - Frontend
+        - Repository tooling
+        - CI/CD
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What must be true for this issue to be considered done?
+    validations:
+      required: true

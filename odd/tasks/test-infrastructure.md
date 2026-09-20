@@ -48,7 +48,7 @@ A reliable workspace-wide test contract is required before product features begi
 ## Delivery
 
 - Strategy: `ask-on-risk`.
-- Branch: `feature/test-infrastructure` from `develop`.
+- Branch: `test/test-infrastructure` from `develop`.
 - Forecast: approximately 250–400 authored changed lines, excluding the generated lockfile.
 - Planned PR target: `develop`.
 
@@ -62,7 +62,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Verification: `git ls-files 'node_modules/**' | wc -l` and `git ls-files '**/node_modules/**' | wc -l` both returned `0`; 32,151 root paths and 30 nested backend paths were removed from the index; local root and backend dependencies remained present.
   - Runtime harness: N/A — repository hygiene has no runtime boundary.
   - Rollback boundary: restore `.gitignore` and the removed `node_modules/` index entries without changing local dependency files.
-  - Commits: `091e92ebccbc` (`chore(repo): stop tracking generated dependencies`) and corrective `1e2d3fb3d922` (`chore(repo): untrack nested dependencies`).
+  - Commits: `c5fe1ba963ca` (`chore(repo): stop tracking generated dependencies`) and corrective `55dc7a69caa0` (`chore(repo): untrack nested dependencies`).
 
 - [x] **TST-001 — Establish workspace and domain test foundation**
   - Route: delegated.
@@ -73,7 +73,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Runtime harness: N/A — this work unit establishes package-level test and type contracts without a deployable runtime.
   - Lockfile: `pnpm install` completed for all four workspace projects with one existing backend TypeScript peer warning; the redundant frontend lockfile was removed.
   - Rollback boundary: revert the root manifest, root lockfile, domain package/configuration/source, and redundant frontend lockfile removal without affecting backend or frontend source.
-  - Commit: `f4d83f31a461` (`test(domain): establish workspace test foundation`).
+  - Commit: `d24d17ad1335` (`test(domain): establish workspace test foundation`).
 
 - [x] **TST-002 — Unify backend tests under Vitest**
   - Route: delegated.
@@ -83,7 +83,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Runtime harness: the focused `test:e2e` Vitest/Supertest in-process HTTP test passed.
   - Dependency result: `pnpm install` exited 0 without peer warnings after replacing `vite-tsconfig-paths` with Vite's native `resolve.tsconfigPaths` support.
   - Rollback boundary: revert backend scripts, both Vitest configs, the backend dependency removal, and matching root lockfile entries.
-  - Commit: `5e6816d70527` (`test(backend): include integration tests by default`).
+  - Commit: `01331422f346` (`test(backend): include integration tests by default`).
 
 - [x] **TST-003 — Add frontend Vitest and Storybook testing**
   - Route: delegated.
@@ -95,7 +95,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Environment: `pnpm --filter frontend exec playwright install chromium` installed Playwright Chromium 1243 and its headless shell using the Ubuntu 24.04 fallback build because the host OS is not officially supported.
   - Build notes: Storybook reported non-failing warnings for the ignored bundled `use client` directive and a chunk above 500 kB; no generated demo components or assets were added.
   - Rollback boundary: revert frontend Storybook/Vitest config, component/story, package scripts/dependencies, and matching root lockfile entries; the external browser cache can be removed independently.
-  - Commit: `101d075eabfb` (`test(frontend): add Vitest and Storybook browser tests`).
+  - Commit: `d703d7cb1594` (`test(frontend): add Vitest and Storybook browser tests`).
 
 - [x] **TST-004 — Verify the workspace TDD contract**
   - Route: delegated.
@@ -107,7 +107,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Temporary allowances: none; no `passWithNoTests` setting remains and every package has a real Vitest test.
   - Rollback boundary: revert the final ESLint generated-output ignore and this verification evidence independently; capability rollback boundaries remain listed on TST-000 through TST-003.
   - Authored-line estimate: 394 lines before this final evidence update, excluding generated lockfiles and all dependency index removals; the final count is recorded below.
-  - Commit: `5318dbc4443c` (`docs(testing): record workspace verification contract`).
+  - Commit: `c4cc509bb7f2` (`docs(testing): record workspace verification contract`).
 
 - [x] **TST-005 — Make the root test command fail closed**
   - Route: direct bounded correction.
@@ -119,7 +119,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Structural verification: all 3 current workspace children expose `test: vitest run`; the temporary probe is absent; the ODD document contains zero NUL bytes; only `package.json` and this document remain in the correction work unit.
   - Runtime harness: N/A — this correction enforces the workspace test-command boundary and does not change a deployable runtime path.
   - Rollback boundary: revert only the root `package.json` test command and this TST-005 evidence; no package tests, dependencies, lockfiles, or runtime code are part of the correction.
-  - Commit: closed by the `fix(testing): make workspace tests fail closed` work-unit commit containing this correction and its evidence.
+  - Commit: `5d478f899930` (`fix(testing): make workspace tests fail closed`).
 
 ## Acceptance Criteria
 

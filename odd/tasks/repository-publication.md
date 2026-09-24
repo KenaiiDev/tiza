@@ -100,14 +100,14 @@ The initial commit contains generated dependency trees at the repository root an
   - Verification: secure body readback matches the issue-form controls in order, required answers are non-empty, state is open, and labels include `enhancement` and `status:approved`.
   - Rollback: issue creation is not needed; if later readback loses approval or identity becomes ambiguous, stop before PR mutation.
 
-- [ ] **PUB-008 — Publish the tracker and child PRs**
+- [x] **PUB-008 — Publish the tracker and child PRs**
   - Route: one draft/no-merge tracker PR to `develop`, followed by three child PRs with the exact base/head relationships in PUB-005.
   - Use the repository PR template, `Closes #1`, exactly one `type:chore` label per PR, chain context and dependency diagram, start/end/dependencies/out-of-scope boundaries, exact test evidence, and a rollback boundary.
   - Push only the four declared chain branches. Create every PR and perform every label mutation once, then read back base, head, draft state, body controls, labels, state, and checks.
   - Verification: tracker remains draft; child diffs are unpolluted; each PR is open, unmerged, and has exactly `type:chore` among `type:*` labels.
   - Rollback: do not merge; an unexpected or unknown mutation result stops all later mutations and blind retries.
 
-- [ ] **PUB-009 — Record final publication evidence**
+- [x] **PUB-009 — Record final publication evidence**
   - Route: tracker documentation work unit plus Engram mirror update.
   - Record issue/PR URLs, exact branch and commit identities, observed budgets, command results, checks, and pending work after each completed publication task.
   - Verification: repository document and Engram topic `odd/repository-publication/tasks` read back with matching full content; final worktree is clean and every local chain branch tracks its intended remote branch.
@@ -170,6 +170,16 @@ Before successful validation and recovery-ref cleanup, restore the three branch 
   - Child 2: `0077505d`..`5c876f84` — domain/backend Vitest, 111 authored lines excluding generated lockfiles.
   - Child 3: `316640c6`..`7f9dc127` — frontend/Storybook and fail-closed workspace tests, 244 authored lines excluding generated lockfiles.
 - Verified the final child tree matches source commit `0aabdd5a` outside the tracker publication document and the contribution templates inherited from `develop`.
+- Published the approved-issue-linked feature-branch chain without merging:
+
+  | PR | Role | Base | Head | Draft | Type label | Readback |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | [#2](https://github.com/KenaiiDev/tiza/pull/2) | Tracker/no-merge | `develop` | `test/test-infrastructure-chain` | Yes | `type:chore` | Open, unmerged, clean merge state |
+  | [#3](https://github.com/KenaiiDev/tiza/pull/3) | Child 1: hygiene | `test/test-infrastructure-chain` | `test/test-infrastructure-01-hygiene` | No | `type:chore` | Open, unmerged, clean merge state |
+  | [#4](https://github.com/KenaiiDev/tiza/pull/4) | Child 2: Vitest | `test/test-infrastructure-01-hygiene` | `test/test-infrastructure-02-vitest` | No | `type:chore` | Open, unmerged, clean merge state |
+  | [#5](https://github.com/KenaiiDev/tiza/pull/5) | Child 3: frontend | `test/test-infrastructure-02-vitest` | `test/test-infrastructure-03-frontend` | No | `type:chore` | Open, unmerged, clean merge state |
+
+- GitHub reported no check runs in `statusCheckRollup` for PRs #2-#5 at the first bounded readback; no CI result was invented or polled indefinitely.
 
 ## Observed Verification
 
@@ -203,9 +213,9 @@ Before successful validation and recovery-ref cleanup, restore the three branch 
 - [x] Reused conforming open issue #1 after one open-and-closed duplicate search and secure form-conformance readback; issue #1 is already labeled `status:approved`.
 - [x] Materialized and verified the four chain branches with clean immediate-parent diffs and authored budgets of 198, 138, 111, and 244 lines before tracker evidence updates.
 - [x] Ran the complete pre-publication command suite with every required command exiting zero and no tracked-file changes.
-- [ ] Push branches and create/read back the draft tracker plus three child PRs.
-- [ ] Record final identities, checks, synchronization, and clean-state evidence.
+- [x] Pushed only the four declared chain branches and created/read back draft tracker #2 plus child PRs #3-#5.
+- [x] Recorded final issue/PR identities, exact routes, labels, checks, verification, and rollback evidence; synchronized the Engram mirror.
 
 ## Next Step
 
-Materialize the declared feature-branch chain, run the complete pre-publication verification suite, and publish the approved-issue-linked tracker and child PRs without merging.
+Review child PRs #3, #4, and #5 in order, integrate them into draft tracker #2 according to the feature-branch chain, and merge nothing until maintainers explicitly authorize it.

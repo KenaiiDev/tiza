@@ -86,7 +86,7 @@ The initial commit contains generated dependency trees at the repository root an
   - Verification: each child diff contains only its declared source boundary, every authored budget is at most 400 after one honest slicing pass, and the tracker is draft/no-merge.
   - Rollback: delete only unpushed local chain branches, or close the unmerged PRs and delete their remote chain branches after explicit authorization; never rewrite the existing `test/test-infrastructure` branch.
 
-- [ ] **PUB-006 — Synchronize and verify the publication candidate**
+- [x] **PUB-006 — Synchronize and verify the publication candidate**
   - Route: local verification before GitHub publication.
   - Synchronize from `develop` by creating the tracker at the verified `develop` tip; do not rebase or rewrite the published source branch.
   - Run `pnpm test`, backend `pnpm --filter backend lint` and `pnpm --filter backend build`, domain `pnpm --filter @tiza/domain typecheck`, frontend `pnpm --filter frontend lint`, `pnpm --filter frontend typecheck`, `pnpm --filter frontend build`, and `pnpm --filter frontend build-storybook`.
@@ -179,6 +179,13 @@ Before successful validation and recovery-ref cleanup, restore the three branch 
 | Commit sequence comparison | Passed: 14 old commits, 14 rewritten commits, and `subjects_match=yes`. |
 | `git fsck --full` before recovery-ref cleanup | Passed with no output. |
 | `pnpm test` | Passed: domain 1 file/2 tests, backend 2 files/2 tests, frontend 1 Chromium story file/1 test. |
+| `pnpm --filter backend lint` | Passed with no diagnostics. |
+| `pnpm --filter backend build` | Passed: Nest build completed. |
+| `pnpm --filter @tiza/domain typecheck` | Passed: `tsc --noEmit` completed with no diagnostics. |
+| `pnpm --filter frontend lint` | Passed with no diagnostics. |
+| `pnpm --filter frontend typecheck` | Passed: `tsc --noEmit` completed with no diagnostics. |
+| `pnpm --filter frontend build` | Passed: Next.js 16.3.5 compiled successfully and generated 4 static pages. |
+| `pnpm --filter frontend build-storybook` | Passed: Storybook 10.2.9 built successfully; Vite reported non-fatal `use client` sourcemap/directive and chunk-size warnings. |
 | Reference cleanup | Passed: only `refs/heads/main`, `refs/heads/develop`, and `refs/heads/test/test-infrastructure` remained among heads, tags, original, and temporary backup namespaces. |
 
 ## Progress
@@ -195,7 +202,7 @@ Before successful validation and recovery-ref cleanup, restore the three branch 
 - [x] Selected `auto-chain` / `feature-branch-chain` and completed one cohesive slicing pass: tracker plus three child PRs, each forecast at or below 400 authored changed lines.
 - [x] Reused conforming open issue #1 after one open-and-closed duplicate search and secure form-conformance readback; issue #1 is already labeled `status:approved`.
 - [x] Materialized and verified the four chain branches with clean immediate-parent diffs and authored budgets of 198, 138, 111, and 244 lines before tracker evidence updates.
-- [ ] Run the complete pre-publication command suite.
+- [x] Ran the complete pre-publication command suite with every required command exiting zero and no tracked-file changes.
 - [ ] Push branches and create/read back the draft tracker plus three child PRs.
 - [ ] Record final identities, checks, synchronization, and clean-state evidence.
 

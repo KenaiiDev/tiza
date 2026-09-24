@@ -69,17 +69,17 @@ The initial commit contains generated dependency trees at the repository root an
   - Runtime harness: `pnpm test` exercises the existing domain, backend, and frontend test boundaries.
   - Rollback: if verification fails before recovery cleanup, restore original tips; otherwise correct only the failing local documentation or repository state in a new work unit.
 
-- [ ] **PUB-005 — Materialize the feature-branch chain**
+- [x] **PUB-005 — Materialize the feature-branch chain**
   - Route: `delivery_strategy: auto-chain`; `chain_strategy: feature-branch-chain`.
   - Trigger: the complete diff is 23 files and 6,622 changed lines including generated lockfiles; the authored work exceeds the 400-line review budget but has cohesive work-unit boundaries.
   - Create `test/test-infrastructure-chain` from synchronized `develop` as the draft/no-merge tracker branch, then build the following immediate-parent chain without force-push or published-history rewriting:
 
     | Position | Head | Base | Source boundary | Scope | Forecast authored budget |
     | --- | --- | --- | --- | --- | --- |
-    | Tracker | `test/test-infrastructure-chain` | `develop` | Current publication control document | Publication plan, identities, verification, and final integration record | Recalculate before PR creation; must remain ≤400 |
-    | 1 of 3 | `test/test-infrastructure-01-hygiene` | `test/test-infrastructure-chain` | `c5fe1ba9`..`7e31d0ec` | Repository hygiene and its ODD evidence | 140 / 400 |
-    | 2 of 3 | `test/test-infrastructure-02-vitest` | `test/test-infrastructure-01-hygiene` | `d24d17ad`..`c8a887cc` | Domain and backend Vitest foundations with their evidence | 117 / 400 |
-    | 3 of 3 | `test/test-infrastructure-03-frontend` | `test/test-infrastructure-02-vitest` | `d703d7cb`..`5d478f89` | Frontend Vitest/Storybook and fail-closed workspace verification | 264 / 400 |
+    | Tracker | `test/test-infrastructure-chain` | `develop` | Current publication control document | Publication plan, identities, verification, and final integration record | 198 / 400 before evidence updates |
+    | 1 of 3 | `test/test-infrastructure-01-hygiene` | `test/test-infrastructure-chain` | `c5fe1ba9`..`7e31d0ec` | Repository hygiene and its ODD evidence | 138 / 400 |
+    | 2 of 3 | `test/test-infrastructure-02-vitest` | `test/test-infrastructure-01-hygiene` | `d24d17ad`..`c8a887cc` | Domain and backend Vitest foundations with their evidence | 111 / 400 |
+    | 3 of 3 | `test/test-infrastructure-03-frontend` | `test/test-infrastructure-02-vitest` | `d703d7cb`..`5d478f89` | Frontend Vitest/Storybook and fail-closed workspace verification | 244 / 400 |
 
   - Exclude generated lockfile lines only from authored review budgets; retain lockfiles in complete diffs and verification.
   - Keep the original source commit order inside each slice. The two historical publication-document commits are replaced by the tracker control-document work unit rather than duplicated into a child.
@@ -93,7 +93,7 @@ The initial commit contains generated dependency trees at the repository root an
   - Verification: every required command exits zero without dependency installation or lockfile mutation; record exact observed results and final per-slice stats.
   - Rollback: stop before issue or PR mutation on any unexpected required failure.
 
-- [ ] **PUB-007 — Reuse or create and approve the feature issue**
+- [x] **PUB-007 — Reuse or create and approve the feature issue**
   - Route: YAML feature request form at `.github/ISSUE_TEMPLATE/feature_request.yml` on `develop`.
   - Duplicate search found the conforming open equivalent [#1](https://github.com/KenaiiDev/tiza/issues/1), `feat: establish workspace-wide test infrastructure`, covering Domain, Backend, Frontend, Repository tooling, and Documentation.
   - Verified authority: authenticated actor `KenaiiDev` has `ADMIN` on `github.com/KenaiiDev/tiza`; the direct user instruction authorizes `status:approved` on this exact reused issue. Readback already shows `status:approved`, so no redundant protected-label mutation is planned.
@@ -164,6 +164,12 @@ Before successful validation and recovery-ref cleanup, restore the three branch 
   - `945dbc26bf33dd997c6e326463552989994a8a84` — `docs(repo): track publication preparation`
 - Renamed `feature/test-infrastructure` to `test/test-infrastructure` only after the rewritten history contained zero matching dependency paths.
 - Removed `refs/original` and `refs/backup/repository-publication/*` after the rewritten sequence, path scan, `git fsck --full`, and `pnpm test` all passed.
+- Materialized the feature-branch chain from `develop` at `5397e5c24e3b6b4ff60c36959dce600b48404180` without rewriting the published source branch:
+  - Tracker seed: `86217955` — `docs(repo): establish publication tracker`.
+  - Child 1: `d6195313`..`2321cfbc` — repository hygiene, 138 authored lines.
+  - Child 2: `0077505d`..`5c876f84` — domain/backend Vitest, 111 authored lines excluding generated lockfiles.
+  - Child 3: `316640c6`..`7f9dc127` — frontend/Storybook and fail-closed workspace tests, 244 authored lines excluding generated lockfiles.
+- Verified the final child tree matches source commit `0aabdd5a` outside the tracker publication document and the contribution templates inherited from `develop`.
 
 ## Observed Verification
 
@@ -188,7 +194,7 @@ Before successful validation and recovery-ref cleanup, restore the three branch 
 - [x] Amended the historical local-only constraint with the direct 2026-09-23 authorization for `github.com/KenaiiDev/tiza` using the current authenticated `gh` session.
 - [x] Selected `auto-chain` / `feature-branch-chain` and completed one cohesive slicing pass: tracker plus three child PRs, each forecast at or below 400 authored changed lines.
 - [x] Reused conforming open issue #1 after one open-and-closed duplicate search and secure form-conformance readback; issue #1 is already labeled `status:approved`.
-- [ ] Materialize and verify the four chain branches.
+- [x] Materialized and verified the four chain branches with clean immediate-parent diffs and authored budgets of 198, 138, 111, and 244 lines before tracker evidence updates.
 - [ ] Run the complete pre-publication command suite.
 - [ ] Push branches and create/read back the draft tracker plus three child PRs.
 - [ ] Record final identities, checks, synchronization, and clean-state evidence.

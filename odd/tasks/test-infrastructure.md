@@ -48,7 +48,7 @@ A reliable workspace-wide test contract is required before product features begi
 ## Delivery
 
 - Strategy: `ask-on-risk`.
-- Branch: `feature/test-infrastructure` from `develop`.
+- Source branch: `test/test-infrastructure` from `develop`.
 - Forecast: approximately 250–400 authored changed lines, excluding the generated lockfile.
 - Planned PR target: `develop`.
 
@@ -62,7 +62,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Verification: `git ls-files 'node_modules/**' | wc -l` and `git ls-files '**/node_modules/**' | wc -l` both returned `0`; 32,151 root paths and 30 nested backend paths were removed from the index; local root and backend dependencies remained present.
   - Runtime harness: N/A — repository hygiene has no runtime boundary.
   - Rollback boundary: restore `.gitignore` and the removed `node_modules/` index entries without changing local dependency files.
-  - Commits: `091e92ebccbc` (`chore(repo): stop tracking generated dependencies`) and corrective `1e2d3fb3d922` (`chore(repo): untrack nested dependencies`).
+  - Source-history commits: `c5fe1ba963ca97e4167d42b654c38bc7555eba2f` (`chore(repo): stop tracking generated dependencies`) and corrective `55dc7a69caa08ee154cb060de6059bee34cf562b` (`chore(repo): untrack nested dependencies`).
 
 - [x] **TST-001 — Establish workspace and domain test foundation**
   - Route: delegated.
@@ -73,7 +73,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Runtime harness: N/A — this work unit establishes package-level test and type contracts without a deployable runtime.
   - Lockfile: `pnpm install` completed for all four workspace projects with one existing backend TypeScript peer warning; the redundant frontend lockfile was removed.
   - Rollback boundary: revert the root manifest, root lockfile, domain package/configuration/source, and redundant frontend lockfile removal without affecting backend or frontend source.
-  - Commit: `f4d83f31a461` (`test(domain): establish workspace test foundation`).
+  - Source-history commit: `d24d17ad1335b2fec5469be6eb7060428425f582` (`test(domain): establish workspace test foundation`).
 
 - [x] **TST-002 — Unify backend tests under Vitest**
   - Route: delegated.
@@ -83,7 +83,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Runtime harness: the focused `test:e2e` Vitest/Supertest in-process HTTP test passed.
   - Dependency result: `pnpm install` exited 0 without peer warnings after replacing `vite-tsconfig-paths` with Vite's native `resolve.tsconfigPaths` support.
   - Rollback boundary: revert backend scripts, both Vitest configs, the backend dependency removal, and matching root lockfile entries.
-  - Commit: `5e6816d70527` (`test(backend): include integration tests by default`).
+  - Source-history commit: `01331422f3463434fcd69dd9ee06d1599eff2236` (`test(backend): include integration tests by default`).
 
 - [x] **TST-003 — Add frontend Vitest and Storybook testing**
   - Route: delegated.
@@ -95,7 +95,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Environment: `pnpm --filter frontend exec playwright install chromium` installed Playwright Chromium 1243 and its headless shell using the Ubuntu 24.04 fallback build because the host OS is not officially supported.
   - Build notes: Storybook reported non-failing warnings for the ignored bundled `use client` directive and a chunk above 500 kB; no generated demo components or assets were added.
   - Rollback boundary: revert frontend Storybook/Vitest config, component/story, package scripts/dependencies, and matching root lockfile entries; the external browser cache can be removed independently.
-  - Commit: `101d075eabfb` (`test(frontend): add Vitest and Storybook browser tests`).
+  - Source-history commit: `d703d7cb15943cb4c280d7d96b7eefaeb2a9617d` (`test(frontend): add Vitest and Storybook browser tests`).
 
 - [x] **TST-004 — Verify the workspace TDD contract**
   - Route: delegated.
@@ -107,7 +107,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Temporary allowances: none; no `passWithNoTests` setting remains and every package has a real Vitest test.
   - Rollback boundary: revert the final ESLint generated-output ignore and this verification evidence independently; capability rollback boundaries remain listed on TST-000 through TST-003.
   - Authored-line estimate: 394 lines before this final evidence update, excluding generated lockfiles and all dependency index removals; the final count is recorded below.
-  - Commit: `5318dbc4443c` (`docs(testing): record workspace verification contract`).
+  - Source-history commit: `c4cc509bb7f2787beb8177aad4ee089f55b86325` (`docs(testing): record workspace verification contract`).
 
 - [x] **TST-005 — Make the root test command fail closed**
   - Route: direct bounded correction.
@@ -119,7 +119,20 @@ A reliable workspace-wide test contract is required before product features begi
   - Structural verification: all 3 current workspace children expose `test: vitest run`; the temporary probe is absent; the ODD document contains zero NUL bytes; only `package.json` and this document remain in the correction work unit.
   - Runtime harness: N/A — this correction enforces the workspace test-command boundary and does not change a deployable runtime path.
   - Rollback boundary: revert only the root `package.json` test command and this TST-005 evidence; no package tests, dependencies, lockfiles, or runtime code are part of the correction.
-  - Commit: closed by the `fix(testing): make workspace tests fail closed` work-unit commit containing this correction and its evidence.
+  - Source-history commit: `5d478f899930e880160e4ed70f02e47372abcda2` (`fix(testing): make workspace tests fail closed`).
+
+- [x] **TST-006 — Correct frontend browser-test accessibility and setup evidence**
+  - Route: delegated bounded correction on `test/test-infrastructure-03-frontend`.
+  - Accepted scope: add one browser story regression for multiple notice instances, replace the shared heading ID with an unconditional React `useId()` value, expose and document a reproducible Playwright Chromium provisioning command, and correct this document's stale source-branch and source-history identities.
+  - RED evidence: `pnpm --filter frontend test:storybook -- --testNamePattern="Multiple Notices"` failed as required with exit 1; the focused story rendered two notices but observed only 1 distinct heading ID, with `expected 1 to be 2` at the uniqueness assertion.
+  - GREEN evidence: the focused command passed 1 story file and 2 tests; `pnpm test` passed domain 1 file/2 tests, backend 2 files/2 tests, and frontend 1 Chromium story file/2 tests.
+  - Frontend verification: lint and typecheck exited 0; the Next.js 16.3.5 production build compiled and generated 4 static pages; the Storybook 10.2.9 build completed with the previously documented non-failing `use client` and chunk-size warnings.
+  - Structural verification: the required scan found zero occurrences of the deprecated source branch name or the six pre-rewrite commit IDs in this document; `git diff --check` exited 0 with no output.
+  - Browser provisioning requirement: contributors must be able to provision the required Chromium binary through a repository package script without changing dependency versions or lockfiles.
+  - Runtime harness: the focused Storybook/Vitest browser test renders two notices in Playwright Chromium and verifies each `aria-labelledby` reference resolves to its own distinct heading.
+  - Rollback boundary: revert only the notice component/story, frontend package script and nearest setup documentation, and this TST-006/source-history evidence; dependencies, lockfiles, and unrelated runtime behavior remain unchanged.
+  - Authored-line count: 73 additions plus deletions across 5 files; generated output is excluded and no lockfile changed.
+  - Commit identity: `fix(frontend): correct notice accessibility test setup`.
 
 ## Acceptance Criteria
 
@@ -147,6 +160,7 @@ A reliable workspace-wide test contract is required before product features begi
 - TST-003: frontend browser story tests, Storybook production build, lint, typecheck, and Next.js production build passed with the documented non-failing build warnings.
 - TST-004: the recorded package suites passed, but later independent verification found that its root command silently skipped workspace children without a `test` script; TST-005 closes that fail-open gap.
 - TST-005: the corrected root command failed closed with exit 1 for a temporary child lacking `test`, then passed all real package suites after the probe was removed.
+- TST-006: multiple notice instances now expose distinct React-generated heading IDs, browser provisioning is reproducible through the frontend package script, and source-history evidence uses the rewritten branch and commit identities.
 
 ### Final Command Results
 
@@ -184,4 +198,4 @@ A reliable workspace-wide test contract is required before product features begi
 
 ## Next Step
 
-The fail-closed correction is implemented and verified. Review its work-unit commit locally; no ODD implementation issue remains. Push, pull request creation, and merge remain human decisions and were not performed.
+TST-006 is implemented and verified as one bounded correction. Review its local work-unit commit; push, pull request editing, and merge remain human decisions and were not performed.

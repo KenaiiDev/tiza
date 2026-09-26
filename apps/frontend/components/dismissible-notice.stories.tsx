@@ -27,3 +27,24 @@ export const Default: Story = {
     await expect(canvas.queryByRole("status")).not.toBeInTheDocument();
   },
 };
+
+export const MultipleNotices: Story = {
+  render: (args) => (
+    <div className="space-y-4">
+      <DismissibleNotice {...args} />
+      <DismissibleNotice {...args} title="Enrollment updated" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const notices = within(canvasElement).getAllByRole("status");
+    const headingIds = notices.map((notice) => {
+      const heading = within(notice).getByRole("heading");
+
+      expect(notice).toHaveAttribute("aria-labelledby", heading.id);
+
+      return heading.id;
+    });
+
+    expect(new Set(headingIds).size).toBe(notices.length);
+  },
+};

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 interface DismissibleNoticeProps {
   message: string;
@@ -12,6 +12,7 @@ export function DismissibleNotice({
   title,
 }: DismissibleNoticeProps) {
   const [isVisible, setIsVisible] = useState(true);
+  const titleId = useId();
 
   if (!isVisible) {
     return null;
@@ -19,13 +20,13 @@ export function DismissibleNotice({
 
   return (
     <section
-      aria-labelledby="notice-title"
+      aria-labelledby={titleId}
       className="max-w-md rounded-xl border border-sky-200 bg-sky-50 p-5 text-sky-950 shadow-sm"
       role="status"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-semibold" id="notice-title">
+          <h2 className="font-semibold" id={titleId}>
             {title}
           </h2>
           <p className="mt-1 text-sm leading-6 text-sky-800">{message}</p>

@@ -113,6 +113,18 @@ The initial commit contains generated dependency trees at the repository root an
   - Verification: repository document and Engram topic `odd/repository-publication/tasks` read back with matching full content; final worktree is clean and every local chain branch tracks its intended remote branch.
   - Rollback: correct only the tracker documentation in a new conventional work-unit commit; do not alter child implementation history.
 
+- [x] **PUB-010 — Establish pull-request CI across the feature-branch chain**
+  - Route: delegated repository-tooling work unit on `test/test-infrastructure-chain`, followed by non-rewriting root-to-leaf merge propagation.
+  - Authorized remote scope: push each of `test/test-infrastructure-chain`, `test/test-infrastructure-01-hygiene`, `test/test-infrastructure-02-vitest`, and `test/test-infrastructure-03-frontend` once, in that order, to `github.com/KenaiiDev/tiza` through the current authenticated session. Do not create, close, or merge PRs; do not touch `main` or `develop`.
+  - Add one least-privilege `.github/workflows/ci.yml` for `pull_request` and manual dispatch. Derive pnpm from the root `packageManager`, use the repository-supported Node major, cache pnpm through `setup-node`, install with the frozen lockfile, provision Playwright Chromium with Linux dependencies in CI, and run the complete workspace verification suite.
+  - Acceptance checks: parse the workflow with an already-installed YAML parser; pass `git diff --check`; run `pnpm test`, backend lint/build, domain typecheck, and frontend lint/typecheck/build/Storybook build without installing local dependencies or changing generated lockfiles; confirm the workflow job/check name and exact commit identity.
+  - Propagation order: merge tracker into child 1, child 1 into child 2, and child 2 into child 3 without rewriting; preserve the existing PR #5 correction commit. Push the four declared branches once in the same root-to-leaf order.
+  - Integration gate: PR integration remains leaf-to-root only after the applicable `CI / Verify` check passes: PR #5 into child 2, PR #4 into child 1, PR #3 into the tracker, and only then tracker PR #2 toward `develop` under separate maintainer authorization.
+  - Rollback: before push, revert the tracker CI work-unit commit and discard only its propagation merges; after push, revert that same tracker commit through new non-rewriting commits propagated root-to-leaf. Never force-push or rewrite the published chain.
+  - Local evidence: PyYAML parsed the workflow and confirmed both triggers, `contents: read`, job `verify`, and 13 steps; `git diff --check` produced no output. The full existing suite passed: domain 1 file/2 tests, backend 2 files/2 tests, frontend 1 Chromium story file/2 tests; backend lint/build, domain typecheck, frontend lint/typecheck/build, and Storybook 10.2.9 build all exited zero. The Storybook build retained only its known non-fatal sourcemap/directive and chunk-size warnings. `pnpm-lock.yaml` remained unchanged, and the Playwright install command was not executed locally.
+  - Workflow identity: workflow `CI`, job `Verify`, GitHub check `CI / Verify`; pnpm resolves from root `packageManager: pnpm@10.26.0`, while Node 24 follows the backend's `@types/node` major and the verified local Node 24 toolchain.
+  - Commit identity: `ci(workflows): establish pull-request verification` on `test/test-infrastructure-chain`; the immutable hash is read back after creating the single commit that contains this evidence and workflow.
+
 ## Acceptance Criteria
 
 - Every commit reachable from `main`, `develop`, and `test/test-infrastructure` contains no tracked path under any `node_modules` directory.
@@ -180,6 +192,7 @@ Before successful validation and recovery-ref cleanup, restore the three branch 
   | [#5](https://github.com/KenaiiDev/tiza/pull/5) | Child 3: frontend | `test/test-infrastructure-02-vitest` | `test/test-infrastructure-03-frontend` | No | `type:chore` | Open, unmerged, clean merge state |
 
 - GitHub reported no check runs in `statusCheckRollup` for PRs #2-#5 at the first bounded readback; no CI result was invented or polled indefinitely.
+- Established `CI / Verify` as the single pull-request check, with manual dispatch, read-only repository contents, per-PR concurrency cancellation, pnpm caching, frozen installation, CI-only Chromium/Linux dependency provisioning, and the complete existing verification suite.
 
 ## Observed Verification
 
@@ -196,6 +209,9 @@ Before successful validation and recovery-ref cleanup, restore the three branch 
 | `pnpm --filter frontend typecheck` | Passed: `tsc --noEmit` completed with no diagnostics. |
 | `pnpm --filter frontend build` | Passed: Next.js 16.3.5 compiled successfully and generated 4 static pages. |
 | `pnpm --filter frontend build-storybook` | Passed: Storybook 10.2.9 built successfully; Vite reported non-fatal `use client` sourcemap/directive and chunk-size warnings. |
+| CI workflow parse | Passed with installed PyYAML: `pull_request` and `workflow_dispatch`, `contents: read`, `CI / Verify`, and 13 steps confirmed. |
+| `git diff --check` | Passed with no output. |
+| `git diff --exit-code -- pnpm-lock.yaml` | Passed with no output after the complete local suite. |
 | Reference cleanup | Passed: only `refs/heads/main`, `refs/heads/develop`, and `refs/heads/test/test-infrastructure` remained among heads, tags, original, and temporary backup namespaces. |
 
 ## Progress
@@ -215,7 +231,8 @@ Before successful validation and recovery-ref cleanup, restore the three branch 
 - [x] Ran the complete pre-publication command suite with every required command exiting zero and no tracked-file changes.
 - [x] Pushed only the four declared chain branches and created/read back draft tracker #2 plus child PRs #3-#5.
 - [x] Recorded final issue/PR identities, exact routes, labels, checks, verification, and rollback evidence; synchronized the Engram mirror.
+- [x] Added and locally verified the minimal pull-request CI foundation; propagation and four authorized pushes remain part of this same bounded work unit.
 
 ## Next Step
 
-Review child PRs #3, #4, and #5 in order, integrate them into draft tracker #2 according to the feature-branch chain, and merge nothing until maintainers explicitly authorize it.
+Observe `CI / Verify`, then retain the existing leaf-to-root PR integration order. Merge nothing until checks pass and maintainers explicitly authorize integration.

@@ -134,6 +134,18 @@ A reliable workspace-wide test contract is required before product features begi
   - Authored-line count: 73 additions plus deletions across 5 files; generated output is excluded and no lockfile changed.
   - Commit identity: `fix(frontend): correct notice accessibility test setup`.
 
+- [x] **TST-007 — Make frontend typechecking self-contained**
+  - Route: delegated bounded correction on `test/test-infrastructure-03-frontend`.
+  - CI RED evidence: GitHub Actions run `36269785217` failed on a clean runner during `pnpm --filter frontend typecheck`, before `next build`, with `apps/frontend/app/layout.tsx(20,50): error TS2304: Cannot find name 'LayoutProps'`.
+  - Implementation: the frontend `typecheck` script now runs `next typegen && tsc --noEmit`, using the repository-local Next.js 16.3.5 CLI to generate route-aware global types before TypeScript validation.
+  - Clean-state GREEN evidence: after removing only generated `apps/frontend/.next`, `pnpm --filter frontend typecheck` exited 0; `next typegen` reported `Types generated successfully`, then `tsc --noEmit` passed without relying on pre-existing generated output.
+  - Regression verification: `pnpm --filter frontend lint` exited 0; `pnpm --filter frontend build` compiled successfully, passed TypeScript, and generated 4 static pages; `pnpm test` exited 0 with domain 1 file/2 tests, backend 2 files/2 tests, and frontend 1 Chromium story file/2 tests.
+  - Structural verification: `git diff --check` exited 0 with no output, and `git diff --exit-code -- pnpm-lock.yaml` exited 0, confirming the lockfile is unchanged.
+  - Runtime harness: N/A — this correction makes the static typecheck boundary reproducible on a clean runner and does not change application runtime behavior.
+  - Rollback boundary: revert only the frontend `typecheck` package script and this TST-007 evidence; source, dependencies, lockfiles, and unrelated test infrastructure remain unchanged.
+  - Authored-line count: 23 additions plus deletions across 2 files; generated `.next` output is excluded and no lockfile changed.
+  - Commit identity: `fix(frontend): make typecheck self-contained`.
+
 ## Acceptance Criteria
 
 - `pnpm test` runs all package test suites and succeeds.
@@ -161,6 +173,7 @@ A reliable workspace-wide test contract is required before product features begi
 - TST-004: the recorded package suites passed, but later independent verification found that its root command silently skipped workspace children without a `test` script; TST-005 closes that fail-open gap.
 - TST-005: the corrected root command failed closed with exit 1 for a temporary child lacking `test`, then passed all real package suites after the probe was removed.
 - TST-006: multiple notice instances now expose distinct React-generated heading IDs, browser provisioning is reproducible through the frontend package script, and source-history evidence uses the rewritten branch and commit identities.
+- TST-007: the frontend typecheck now generates route-aware Next.js types before TypeScript validation and passes from a removed `.next` state without dependency or lockfile changes.
 
 ### Final Command Results
 
@@ -173,12 +186,12 @@ A reliable workspace-wide test contract is required before product features begi
 | `pnpm --filter backend test:e2e` | Passed: Vitest 4.1.11, 1 file, 1 test. |
 | `pnpm --filter backend lint` | Passed: type-aware oxlint exited 0. |
 | `pnpm --filter backend build` | Passed: `nest build` exited 0. |
-| `pnpm --filter frontend test` | Passed: Vitest 4.1.11, 1 Chromium story file, 1 test. |
+| `pnpm --filter frontend test` | Passed: Vitest 4.1.11, 1 Chromium story file, 2 tests. |
 | `pnpm --filter frontend build-storybook` | Passed with Storybook 10.2.9 and Vite 7.3.6; non-failing `use client` sourcemap/directive and chunk-size warnings remained. |
 | `pnpm --filter frontend lint` | Passed after `storybook-static/**` was added to ESLint global ignores; the initial attempt failed only on generated Storybook bundles. |
-| `pnpm --filter frontend typecheck` | Passed: `tsc --noEmit` exited 0. |
+| `pnpm --filter frontend typecheck` | Passed from a removed `.next` state: `next typegen` generated route-aware types, then `tsc --noEmit` exited 0. |
 | `pnpm --filter frontend build` | Passed: Next.js 16.3.5 compiled, typechecked, and generated 4 static pages. |
-| `pnpm test` | Passed with the corrected fail-closed command: domain 1 file/2 tests, backend 2 files/2 tests, frontend 1 file/1 Chromium story test. |
+| `pnpm test` | Passed with the corrected fail-closed command: domain 1 file/2 tests, backend 2 files/2 tests, frontend 1 file/2 Chromium story tests. |
 | `pnpm test` with temporary missing-script child | Failed as required with exit 1, `ERR_PNPM_NO_SCRIPT`, and recursive summary 1 failure/3 passes; the probe was then removed completely. |
 | `pnpm install --frozen-lockfile` | Passed; lockfile was current. pnpm repeated the ignored esbuild build-script warning. |
 | Structural checks | Passed: all 3 workspace children use `test: vitest run`, the temporary probe is absent, the ODD document has zero NUL bytes, and the correction contains only `package.json` plus this document. |
@@ -198,4 +211,4 @@ A reliable workspace-wide test contract is required before product features begi
 
 ## Next Step
 
-TST-006 is implemented and verified as one bounded correction. Review its local work-unit commit; push, pull request editing, and merge remain human decisions and were not performed.
+TST-007 is implemented and locally verified as one bounded correction. Push its work-unit commit to the existing PR #5, then read back the PR head and check rollup without merging.

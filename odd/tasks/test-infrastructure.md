@@ -40,15 +40,15 @@ A reliable workspace-wide test contract is required before product features begi
 
 ## TDD Configuration
 
-- Current mode: disabled.
-- Source: `sdd/tiza/testing-capabilities` baseline.
-- Reason: no workspace-wide test command currently covers every package.
-- Target runner: `pnpm test`, delegating to Vitest in every package.
+- Current mode: enabled for future feature work.
+- Source: this ODD change, verified by the fail-closed TST-005 workspace contract.
+- Runner: `pnpm test`, delegating to Vitest in every package.
+- Setup evidence: ordinary functional verification only; this infrastructure change does not claim strict RED/GREEN evidence for its own creation.
 
 ## Delivery
 
 - Strategy: `ask-on-risk`.
-- Branch: `feature/test-infrastructure` from `develop`.
+- Source branch: `test/test-infrastructure` from `develop`.
 - Forecast: approximately 250–400 authored changed lines, excluding the generated lockfile.
 - Planned PR target: `develop`.
 
@@ -62,7 +62,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Verification: `git ls-files 'node_modules/**' | wc -l` and `git ls-files '**/node_modules/**' | wc -l` both returned `0`; 32,151 root paths and 30 nested backend paths were removed from the index; local root and backend dependencies remained present.
   - Runtime harness: N/A — repository hygiene has no runtime boundary.
   - Rollback boundary: restore `.gitignore` and the removed `node_modules/` index entries without changing local dependency files.
-  - Commits: `091e92ebccbc` (`chore(repo): stop tracking generated dependencies`) and corrective `1e2d3fb3d922` (`chore(repo): untrack nested dependencies`).
+  - Source-history commits: `c5fe1ba963ca97e4167d42b654c38bc7555eba2f` (`chore(repo): stop tracking generated dependencies`) and corrective `55dc7a69caa08ee154cb060de6059bee34cf562b` (`chore(repo): untrack nested dependencies`).
 
 - [x] **TST-001 — Establish workspace and domain test foundation**
   - Route: delegated.
@@ -73,7 +73,7 @@ A reliable workspace-wide test contract is required before product features begi
   - Runtime harness: N/A — this work unit establishes package-level test and type contracts without a deployable runtime.
   - Lockfile: `pnpm install` completed for all four workspace projects with one existing backend TypeScript peer warning; the redundant frontend lockfile was removed.
   - Rollback boundary: revert the root manifest, root lockfile, domain package/configuration/source, and redundant frontend lockfile removal without affecting backend or frontend source.
-  - Commit: `f4d83f31a461` (`test(domain): establish workspace test foundation`).
+  - Source-history commit: `d24d17ad1335b2fec5469be6eb7060428425f582` (`test(domain): establish workspace test foundation`).
 
 - [x] **TST-002 — Unify backend tests under Vitest**
   - Route: delegated.
@@ -83,27 +83,73 @@ A reliable workspace-wide test contract is required before product features begi
   - Runtime harness: the focused `test:e2e` Vitest/Supertest in-process HTTP test passed.
   - Dependency result: `pnpm install` exited 0 without peer warnings after replacing `vite-tsconfig-paths` with Vite's native `resolve.tsconfigPaths` support.
   - Rollback boundary: revert backend scripts, both Vitest configs, the backend dependency removal, and matching root lockfile entries.
-  - Commit: `5e6816d70527` (`test(backend): include integration tests by default`).
+  - Source-history commit: `01331422f3463434fcd69dd9ee06d1599eff2236` (`test(backend): include integration tests by default`).
 
-- [ ] **TST-003 — Add frontend Vitest and Storybook testing**
+- [x] **TST-003 — Add frontend Vitest and Storybook testing**
   - Route: delegated.
   - Trigger: Storybook, Vitest browser mode, package scripts, and representative stories span multiple files.
   - Configure Storybook with `@storybook/nextjs-vite`, Vitest integration, Playwright Chromium, Tailwind globals, and App Router support.
   - Add a minimal representative component boundary with a behavioral story/test instead of generated demo content.
-  - Verification: frontend tests, Storybook build, frontend lint, typecheck/build.
-  - Commit: pending.
+  - Verification: `pnpm --filter frontend test` and `test:storybook` each passed 1 browser story test with Vitest 4.1.11 and Chromium; `build-storybook` completed with Storybook 10.2.9/Vite 7.3.6; frontend lint, typecheck, and Next.js production build exited 0.
+  - Runtime harness: the Storybook play test rendered the interactive notice in Chromium, clicked its accessible dismiss button, and observed that the status region was removed.
+  - Environment: `pnpm --filter frontend exec playwright install chromium` installed Playwright Chromium 1243 and its headless shell using the Ubuntu 24.04 fallback build because the host OS is not officially supported.
+  - Build notes: Storybook reported non-failing warnings for the ignored bundled `use client` directive and a chunk above 500 kB; no generated demo components or assets were added.
+  - Rollback boundary: revert frontend Storybook/Vitest config, component/story, package scripts/dependencies, and matching root lockfile entries; the external browser cache can be removed independently.
+  - Source-history commit: `d703d7cb15943cb4c280d7d96b7eefaeb2a9617d` (`test(frontend): add Vitest and Storybook browser tests`).
 
-- [ ] **TST-004 — Verify the workspace TDD contract**
+- [x] **TST-004 — Verify the workspace TDD contract**
   - Route: delegated.
   - Trigger: cross-package verification and lockfile normalization require repository-wide context.
   - Confirm `pnpm test` executes Vitest for backend, frontend, and domain; verify builds and record any environmental prerequisite.
   - Remove temporary no-test allowances once every package has a real test.
-  - Verification: clean install compatibility, workspace tests, package builds, and structural readback.
-  - Commit: pending.
+  - Verification: all required install, package test, lint, typecheck, build, root test, frozen-install, and structural commands passed after excluding generated `storybook-static/` output from ESLint.
+  - Runtime harness: root `pnpm test` ran domain (1 file/2 tests), backend (2 files/2 tests), and frontend Storybook Chromium coverage (1 file/1 test) and exited 0.
+  - Temporary allowances: none; no `passWithNoTests` setting remains and every package has a real Vitest test.
+  - Rollback boundary: revert the final ESLint generated-output ignore and this verification evidence independently; capability rollback boundaries remain listed on TST-000 through TST-003.
+  - Authored-line estimate: 394 lines before this final evidence update, excluding generated lockfiles and all dependency index removals; the final count is recorded below.
+  - Source-history commit: `c4cc509bb7f2787beb8177aad4ee089f55b86325` (`docs(testing): record workspace verification contract`).
+
+- [x] **TST-005 — Make the root test command fail closed**
+  - Route: direct bounded correction.
+  - Trigger: independent verification proved that `pnpm --recursive --no-bail test` silently skipped a workspace child without a `test` script and exited 0, so TST-004 did not fully enforce the workspace contract.
+  - Replace the recursive lifecycle invocation with `pnpm --recursive --no-bail exec pnpm run test`, preserving `--no-bail` coverage while requiring every selected child package to provide a `test` script.
+  - RED evidence: the previous root command skipped a bounded workspace child without a `test` script and exited 0 during independent verification.
+  - GREEN verification: with temporary `packages/__missing-test-probe/package.json` present and no `test` script, `pnpm test` ran all three real package suites, reported `ERR_PNPM_NO_SCRIPT` and a summary of 1 failure/3 passes, and exited 1.
+  - Regression verification: after removing the probe completely, `pnpm test` exited 0; domain passed 1 file/2 tests, backend passed 2 files/2 tests, and frontend passed 1 Chromium story file/1 test.
+  - Structural verification: all 3 current workspace children expose `test: vitest run`; the temporary probe is absent; the ODD document contains zero NUL bytes; only `package.json` and this document remain in the correction work unit.
+  - Runtime harness: N/A — this correction enforces the workspace test-command boundary and does not change a deployable runtime path.
+  - Rollback boundary: revert only the root `package.json` test command and this TST-005 evidence; no package tests, dependencies, lockfiles, or runtime code are part of the correction.
+  - Source-history commit: `5d478f899930e880160e4ed70f02e47372abcda2` (`fix(testing): make workspace tests fail closed`).
+
+- [x] **TST-006 — Correct frontend browser-test accessibility and setup evidence**
+  - Route: delegated bounded correction on `test/test-infrastructure-03-frontend`.
+  - Accepted scope: add one browser story regression for multiple notice instances, replace the shared heading ID with an unconditional React `useId()` value, expose and document a reproducible Playwright Chromium provisioning command, and correct this document's stale source-branch and source-history identities.
+  - RED evidence: `pnpm --filter frontend test:storybook -- --testNamePattern="Multiple Notices"` failed as required with exit 1; the focused story rendered two notices but observed only 1 distinct heading ID, with `expected 1 to be 2` at the uniqueness assertion.
+  - GREEN evidence: the focused command passed 1 story file and 2 tests; `pnpm test` passed domain 1 file/2 tests, backend 2 files/2 tests, and frontend 1 Chromium story file/2 tests.
+  - Frontend verification: lint and typecheck exited 0; the Next.js 16.3.5 production build compiled and generated 4 static pages; the Storybook 10.2.9 build completed with the previously documented non-failing `use client` and chunk-size warnings.
+  - Structural verification: the required scan found zero occurrences of the deprecated source branch name or the six pre-rewrite commit IDs in this document; `git diff --check` exited 0 with no output.
+  - Browser provisioning requirement: contributors must be able to provision the required Chromium binary through a repository package script without changing dependency versions or lockfiles.
+  - Runtime harness: the focused Storybook/Vitest browser test renders two notices in Playwright Chromium and verifies each `aria-labelledby` reference resolves to its own distinct heading.
+  - Rollback boundary: revert only the notice component/story, frontend package script and nearest setup documentation, and this TST-006/source-history evidence; dependencies, lockfiles, and unrelated runtime behavior remain unchanged.
+  - Authored-line count: 73 additions plus deletions across 5 files; generated output is excluded and no lockfile changed.
+  - Commit identity: `fix(frontend): correct notice accessibility test setup`.
+
+- [x] **TST-007 — Make frontend typechecking self-contained**
+  - Route: delegated bounded correction on `test/test-infrastructure-03-frontend`.
+  - CI RED evidence: GitHub Actions run `36269785217` failed on a clean runner during `pnpm --filter frontend typecheck`, before `next build`, with `apps/frontend/app/layout.tsx(20,50): error TS2304: Cannot find name 'LayoutProps'`.
+  - Implementation: the frontend `typecheck` script now runs `next typegen && tsc --noEmit`, using the repository-local Next.js 16.3.5 CLI to generate route-aware global types before TypeScript validation.
+  - Clean-state GREEN evidence: after removing only generated `apps/frontend/.next`, `pnpm --filter frontend typecheck` exited 0; `next typegen` reported `Types generated successfully`, then `tsc --noEmit` passed without relying on pre-existing generated output.
+  - Regression verification: `pnpm --filter frontend lint` exited 0; `pnpm --filter frontend build` compiled successfully, passed TypeScript, and generated 4 static pages; `pnpm test` exited 0 with domain 1 file/2 tests, backend 2 files/2 tests, and frontend 1 Chromium story file/2 tests.
+  - Structural verification: `git diff --check` exited 0 with no output, and `git diff --exit-code -- pnpm-lock.yaml` exited 0, confirming the lockfile is unchanged.
+  - Runtime harness: N/A — this correction makes the static typecheck boundary reproducible on a clean runner and does not change application runtime behavior.
+  - Rollback boundary: revert only the frontend `typecheck` package script and this TST-007 evidence; source, dependencies, lockfiles, and unrelated test infrastructure remain unchanged.
+  - Authored-line count: 23 additions plus deletions across 2 files; generated `.next` output is excluded and no lockfile changed.
+  - Commit identity: `fix(frontend): make typecheck self-contained`.
 
 ## Acceptance Criteria
 
 - `pnpm test` runs all package test suites and succeeds.
+- `pnpm test` exits nonzero if any current workspace child lacks a `test` script.
 - Every package test script invokes Vitest; no Jest or Node test runner is introduced.
 - Backend default tests include both unit and in-process HTTP integration coverage.
 - Domain has a functioning framework-free TypeScript/Vitest setup and at least one meaningful behavioral test.
@@ -123,7 +169,46 @@ A reliable workspace-wide test contract is required before product features begi
 - TST-000: repository hygiene verified. Git tracks zero root or nested `node_modules/` paths; 32,151 root paths and 30 nested backend paths were removed with local dependencies retained.
 - TST-001: domain Vitest behavior (2 tests), domain typecheck, workspace recursive test execution, and root lockfile installation passed. The install reported the pre-existing `vite-tsconfig-paths` peer range warning against backend TypeScript 6.0.3.
 - TST-002: backend unit, combined default, focused integration, lint, and build commands all passed; the dependency reinstall removed the TypeScript peer warning.
+- TST-003: frontend browser story tests, Storybook production build, lint, typecheck, and Next.js production build passed with the documented non-failing build warnings.
+- TST-004: the recorded package suites passed, but later independent verification found that its root command silently skipped workspace children without a `test` script; TST-005 closes that fail-open gap.
+- TST-005: the corrected root command failed closed with exit 1 for a temporary child lacking `test`, then passed all real package suites after the probe was removed.
+- TST-006: multiple notice instances now expose distinct React-generated heading IDs, browser provisioning is reproducible through the frontend package script, and source-history evidence uses the rewritten branch and commit identities.
+- TST-007: the frontend typecheck now generates route-aware Next.js types before TypeScript validation and passes from a removed `.next` state without dependency or lockfile changes.
+
+### Final Command Results
+
+| Command | Observed result |
+| --- | --- |
+| `pnpm install` | Passed for all 4 workspace projects; lockfile was current. pnpm reported ignored `esbuild@0.27.7` and `esbuild@0.28.2` build scripts. |
+| `pnpm --filter @tiza/domain test` | Passed: Vitest 4.1.11, 1 file, 2 tests. |
+| `pnpm --filter @tiza/domain typecheck` | Passed: `tsc --noEmit` exited 0. |
+| `pnpm --filter backend test` | Passed: Vitest 4.1.11, 2 files, 2 tests. |
+| `pnpm --filter backend test:e2e` | Passed: Vitest 4.1.11, 1 file, 1 test. |
+| `pnpm --filter backend lint` | Passed: type-aware oxlint exited 0. |
+| `pnpm --filter backend build` | Passed: `nest build` exited 0. |
+| `pnpm --filter frontend test` | Passed: Vitest 4.1.11, 1 Chromium story file, 2 tests. |
+| `pnpm --filter frontend build-storybook` | Passed with Storybook 10.2.9 and Vite 7.3.6; non-failing `use client` sourcemap/directive and chunk-size warnings remained. |
+| `pnpm --filter frontend lint` | Passed after `storybook-static/**` was added to ESLint global ignores; the initial attempt failed only on generated Storybook bundles. |
+| `pnpm --filter frontend typecheck` | Passed from a removed `.next` state: `next typegen` generated route-aware types, then `tsc --noEmit` exited 0. |
+| `pnpm --filter frontend build` | Passed: Next.js 16.3.5 compiled, typechecked, and generated 4 static pages. |
+| `pnpm test` | Passed with the corrected fail-closed command: domain 1 file/2 tests, backend 2 files/2 tests, frontend 1 file/2 Chromium story tests. |
+| `pnpm test` with temporary missing-script child | Failed as required with exit 1, `ERR_PNPM_NO_SCRIPT`, and recursive summary 1 failure/3 passes; the probe was then removed completely. |
+| `pnpm install --frozen-lockfile` | Passed; lockfile was current. pnpm repeated the ignored esbuild build-script warning. |
+| Structural checks | Passed: all 3 workspace children use `test: vitest run`, the temporary probe is absent, the ODD document has zero NUL bytes, and the correction contains only `package.json` plus this document. |
+
+### Rollback Boundaries
+
+- Repository hygiene: restore `.gitignore` and dependency index entries only; local dependencies are independent.
+- Domain foundation: revert the root test script, domain package/configuration/source, lockfile entries, and deleted frontend lockfile.
+- Backend coverage: revert backend scripts/configuration and native tsconfig-path resolution dependency changes.
+- Frontend coverage: revert Storybook/Vitest configuration, the notice component/story, package scripts/dependencies, lockfile entries, and ESLint generated-output ignore; remove the external Playwright browser cache separately if desired.
+
+### Review Size
+
+- Through TST-004: 432 authored changes (417 additions, 15 deletions), excluding generated lockfiles and dependency index removals.
+- TST-005 correction: 33 authored changes (24 additions, 9 deletions) across the root manifest and this evidence.
+- Cumulative authored changes: 465. The 400-line guideline remains advisory; no code, tests, configuration, or evidence was omitted to reduce the count.
 
 ## Next Step
 
-Implement TST-003 after recording the TST-002 commit identity.
+TST-007 is implemented and locally verified as one bounded correction. Push its work-unit commit to the existing PR #5, then read back the PR head and check rollup without merging.

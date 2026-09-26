@@ -123,7 +123,18 @@ The initial commit contains generated dependency trees at the repository root an
   - Rollback: before push, revert the tracker CI work-unit commit and discard only its propagation merges; after push, revert that same tracker commit through new non-rewriting commits propagated root-to-leaf. Never force-push or rewrite the published chain.
   - Local evidence: PyYAML parsed the workflow and confirmed both triggers, `contents: read`, job `verify`, and 13 steps; `git diff --check` produced no output. The full existing suite passed: domain 1 file/2 tests, backend 2 files/2 tests, frontend 1 Chromium story file/2 tests; backend lint/build, domain typecheck, frontend lint/typecheck/build, and Storybook 10.2.9 build all exited zero. The Storybook build retained only its known non-fatal sourcemap/directive and chunk-size warnings. `pnpm-lock.yaml` remained unchanged, and the Playwright install command was not executed locally.
   - Workflow identity: workflow `CI`, job `Verify`, GitHub check `CI / Verify`; pnpm resolves from root `packageManager: pnpm@10.26.0`, while Node 24 follows the backend's `@types/node` major and the verified local Node 24 toolchain.
-  - Commit identity: `ci(workflows): establish pull-request verification` on `test/test-infrastructure-chain`; the immutable hash is read back after creating the single commit that contains this evidence and workflow.
+  - Commit identity: `58f5f6267e38a09f84cec212e50ab586c1b1cc4e` — `ci(workflows): establish pull-request verification` on `test/test-infrastructure-chain`.
+
+- [x] **PUB-011 — Record completed child-chain integration evidence**
+  - Route: tracker documentation work unit after the already-authorized leaf-to-root integration completed.
+  - Purpose: finalize evidence only; this task does not authorize another merge, mark tracker PR #2 ready, or change any PR state.
+  - CI propagation preceded integration in root-to-leaf order so every existing PR could discover the tracker workflow: tracker `58f5f626`, child 1 `a579380f`, child 2 `91842cbb`, and child 3 `56add1d6`. Because each PR verifies its head tree, the initial runs on incomplete tracker and child slices failed until the complete leaf was folded upward; these expected failures remain part of the delivery record.
+  - PR #5 also exposed a real clean-runner defect rather than a slice-boundary failure: frontend TypeScript could not resolve generated `LayoutProps` before `next build`. TST-007 fixed it in `7cd4a5159f9ce6fb94c1448ffefcb39840a222ca` by running `next typegen && tsc --noEmit`.
+  - Review order remained root-to-leaf (#3, #4, #5), while integration correctly proceeded leaf-to-root: #5 into child 2, #4 into child 1, then #3 into the tracker.
+  - Verification: PR #5 run `36270638588` passed `CI / Verify` in 1m21s; PR #4 run `36270904173` passed in 1m18s; PR #3 run `36271004735` passed in 1m03s; integrated tracker PR #2 run `36271086487` passed in 57s.
+  - Merge evidence: PR #5 merged at `4a5517e652964c0aad2540df90cec8f202ad4553` on 2026-09-26T20:50:26Z; PR #4 merged at `4dad1568e73800408d9187ff54ba55666eb1da69` on 2026-09-26T20:52:14Z; PR #3 merged at `93347eda9e90d29c12957a64e8cd0dc8e7a62a6e` on 2026-09-26T20:53:46Z.
+  - Final gate: tracker PR #2 remains open, draft, and unmerged against `develop`; only maintainer review and explicit authorization to mark it ready or merge remain.
+  - Rollback: revert only this evidence work-unit commit; do not rewrite integration history or mutate PR state.
 
 ## Acceptance Criteria
 
@@ -182,17 +193,28 @@ Before successful validation and recovery-ref cleanup, restore the three branch 
   - Child 2: `0077505d`..`5c876f84` — domain/backend Vitest, 111 authored lines excluding generated lockfiles.
   - Child 3: `316640c6`..`7f9dc127` — frontend/Storybook and fail-closed workspace tests, 244 authored lines excluding generated lockfiles.
 - Verified the final child tree matches source commit `0aabdd5a` outside the tracker publication document and the contribution templates inherited from `develop`.
-- Published the approved-issue-linked feature-branch chain without merging:
+- Published the approved-issue-linked feature-branch chain, then integrated the three child PRs leaf-to-root while retaining the tracker as draft/no-merge:
 
   | PR | Role | Base | Head | Draft | Type label | Readback |
   | --- | --- | --- | --- | --- | --- | --- |
-  | [#2](https://github.com/KenaiiDev/tiza/pull/2) | Tracker/no-merge | `develop` | `test/test-infrastructure-chain` | Yes | `type:chore` | Open, unmerged, clean merge state |
-  | [#3](https://github.com/KenaiiDev/tiza/pull/3) | Child 1: hygiene | `test/test-infrastructure-chain` | `test/test-infrastructure-01-hygiene` | No | `type:chore` | Open, unmerged, clean merge state |
-  | [#4](https://github.com/KenaiiDev/tiza/pull/4) | Child 2: Vitest | `test/test-infrastructure-01-hygiene` | `test/test-infrastructure-02-vitest` | No | `type:chore` | Open, unmerged, clean merge state |
-  | [#5](https://github.com/KenaiiDev/tiza/pull/5) | Child 3: frontend | `test/test-infrastructure-02-vitest` | `test/test-infrastructure-03-frontend` | No | `type:chore` | Open, unmerged, clean merge state |
+  | [#2](https://github.com/KenaiiDev/tiza/pull/2) | Tracker/no-merge | `develop` | `test/test-infrastructure-chain` | Yes | `type:chore` | Open, draft, unmerged; integrated candidate CI passed |
+  | [#3](https://github.com/KenaiiDev/tiza/pull/3) | Child 1: hygiene | `test/test-infrastructure-chain` | `test/test-infrastructure-01-hygiene` | No | `type:chore` | Merged as `93347eda9e90d29c12957a64e8cd0dc8e7a62a6e` |
+  | [#4](https://github.com/KenaiiDev/tiza/pull/4) | Child 2: Vitest | `test/test-infrastructure-01-hygiene` | `test/test-infrastructure-02-vitest` | No | `type:chore` | Merged as `4dad1568e73800408d9187ff54ba55666eb1da69` |
+  | [#5](https://github.com/KenaiiDev/tiza/pull/5) | Child 3: frontend | `test/test-infrastructure-02-vitest` | `test/test-infrastructure-03-frontend` | No | `type:chore` | Merged as `4a5517e652964c0aad2540df90cec8f202ad4553` |
 
 - GitHub reported no check runs in `statusCheckRollup` for PRs #2-#5 at the first bounded readback; no CI result was invented or polled indefinitely.
 - Established `CI / Verify` as the single pull-request check, with manual dispatch, read-only repository contents, per-PR concurrency cancellation, pnpm caching, frozen installation, CI-only Chromium/Linux dependency provisioning, and the complete existing verification suite.
+- Propagated CI root-to-leaf before integration: tracker `58f5f626`, child 1 `a579380f`, child 2 `91842cbb`, and child 3 `56add1d6`. Initial runs on partial slices failed until the complete leaf was folded upward; PR #5 additionally revealed the clean-runner `LayoutProps` defect fixed by TST-007. These failures are retained as evidence rather than hidden.
+- Preserved root-to-leaf review order (#3, #4, #5) and completed the distinct leaf-to-root integration order (#5, #4, #3).
+
+### GitHub CI and Integration Results
+
+| Candidate | `CI / Verify` result | Integration result |
+| --- | --- | --- |
+| PR #5 | Run `36270638588` passed in 1m21s after TST-007. | Merged into child 2 as `4a5517e652964c0aad2540df90cec8f202ad4553` at 2026-09-26T20:50:26Z. |
+| PR #4 | Run `36270904173` passed in 1m18s after PR #5 was folded into its head branch. | Merged into child 1 as `4dad1568e73800408d9187ff54ba55666eb1da69` at 2026-09-26T20:52:14Z. |
+| PR #3 | Run `36271004735` passed in 1m03s after PR #4 was folded into its head branch. | Merged into the tracker as `93347eda9e90d29c12957a64e8cd0dc8e7a62a6e` at 2026-09-26T20:53:46Z. |
+| Draft tracker PR #2 | Integrated candidate run `36271086487` passed in 57s. | Remains open, draft, and unmerged against `develop`. |
 
 ## Observed Verification
 
@@ -231,8 +253,11 @@ Before successful validation and recovery-ref cleanup, restore the three branch 
 - [x] Ran the complete pre-publication command suite with every required command exiting zero and no tracked-file changes.
 - [x] Pushed only the four declared chain branches and created/read back draft tracker #2 plus child PRs #3-#5.
 - [x] Recorded final issue/PR identities, exact routes, labels, checks, verification, and rollback evidence; synchronized the Engram mirror.
-- [x] Added and locally verified the minimal pull-request CI foundation; propagation and four authorized pushes remain part of this same bounded work unit.
+- [x] Added and locally verified the minimal pull-request CI foundation in immutable commit `58f5f6267e38a09f84cec212e50ab586c1b1cc4e`, then propagated it root-to-leaf across all four chain branches.
+- [x] Preserved the initial partial-slice CI failures and the real PR #5 clean-runner `LayoutProps` failure as delivery evidence; TST-007 fixed the latter in `7cd4a5159f9ce6fb94c1448ffefcb39840a222ca`.
+- [x] Completed the authorized child integration leaf-to-root: PR #5, then #4, then #3; all applicable pre-merge `CI / Verify` runs passed.
+- [x] Confirmed the fully integrated tracker candidate passed `CI / Verify` while PR #2 remained open, draft, and unmerged.
 
 ## Next Step
 
-Observe `CI / Verify`, then retain the existing leaf-to-root PR integration order. Merge nothing until checks pass and maintainers explicitly authorize integration.
+Maintainers review the fully integrated candidate in draft tracker PR #2. Marking it ready or merging it into `develop` requires separate explicit authorization; no child integration remains pending.

@@ -144,7 +144,8 @@ A reliable workspace-wide test contract is required before product features begi
   - Runtime harness: N/A — this correction makes the static typecheck boundary reproducible on a clean runner and does not change application runtime behavior.
   - Rollback boundary: revert only the frontend `typecheck` package script and this TST-007 evidence; source, dependencies, lockfiles, and unrelated test infrastructure remain unchanged.
   - Authored-line count: 23 additions plus deletions across 2 files; generated `.next` output is excluded and no lockfile changed.
-  - Commit identity: `fix(frontend): make typecheck self-contained`.
+  - Commit identity: `7cd4a5159f9ce6fb94c1448ffefcb39840a222ca` — `fix(frontend): make typecheck self-contained`; pushed to the existing PR #5 branch.
+  - Delivery evidence: PR #5 `CI / Verify` run `36270638588` passed in 1m21s. The correction was then integrated through the authorized leaf-to-root chain via PR #5 merge `4a5517e652964c0aad2540df90cec8f202ad4553`, PR #4 merge `4dad1568e73800408d9187ff54ba55666eb1da69`, and PR #3 merge `93347eda9e90d29c12957a64e8cd0dc8e7a62a6e` into draft tracker PR #2.
 
 ## Acceptance Criteria
 
@@ -163,6 +164,8 @@ A reliable workspace-wide test contract is required before product features begi
 - Exploration completed: existing test and Storybook gaps mapped across the workspace.
 - User requirement confirmed: Vitest is the only test runner for backend, frontend, and domain.
 - User authorized removing tracked `node_modules/` files from the Git index before dependency installation.
+- TST-007 was committed as `7cd4a5159f9ce6fb94c1448ffefcb39840a222ca`, pushed to PR #5, passed `CI / Verify` in run `36270638588`, and was integrated into draft tracker PR #2 through the completed #5 -> #4 -> #3 leaf-to-root chain.
+- Draft tracker PR #2 remains open and unmerged; its fully integrated candidate passed `CI / Verify` in run `36271086487`.
 
 ## Verification Evidence
 
@@ -173,7 +176,7 @@ A reliable workspace-wide test contract is required before product features begi
 - TST-004: the recorded package suites passed, but later independent verification found that its root command silently skipped workspace children without a `test` script; TST-005 closes that fail-open gap.
 - TST-005: the corrected root command failed closed with exit 1 for a temporary child lacking `test`, then passed all real package suites after the probe was removed.
 - TST-006: multiple notice instances now expose distinct React-generated heading IDs, browser provisioning is reproducible through the frontend package script, and source-history evidence uses the rewritten branch and commit identities.
-- TST-007: the frontend typecheck now generates route-aware Next.js types before TypeScript validation and passes from a removed `.next` state without dependency or lockfile changes.
+- TST-007: the frontend typecheck now generates route-aware Next.js types before TypeScript validation and passes from a removed `.next` state without dependency or lockfile changes. Commit `7cd4a5159f9ce6fb94c1448ffefcb39840a222ca` passed PR #5 CI and is present in the integrated draft tracker through merge commits `4a5517e6`, `4dad1568`, and `93347eda`.
 
 ### Final Command Results
 
@@ -211,4 +214,4 @@ A reliable workspace-wide test contract is required before product features begi
 
 ## Next Step
 
-TST-007 is implemented and locally verified as one bounded correction. Push its work-unit commit to the existing PR #5, then read back the PR head and check rollup without merging.
+TST-007 is pushed, CI-verified, and integrated into draft tracker PR #2 through the completed child chain. Only maintainer review and separate explicit authorization to mark tracker PR #2 ready or merge it into `develop` remain.

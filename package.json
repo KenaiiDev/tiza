@@ -1,11 +1,11 @@
 {
   "name": "tiza-tools",
-  "private": "true",
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "pnpm --recursive --no-bail exec pnpm run test"
   },
   "keywords": [],
   "author": "",

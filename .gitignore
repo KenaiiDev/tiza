@@ -1,2 +1,19 @@
 .atl/
 .codex/
+
+# Dependencies
+node_modules/
+
+# Framework and build output
+.next/
+dist/
+coverage/
+storybook-static/
+
+# Browser test output
+blob-report/
+playwright-report/
+test-results/
+
+# TypeScript incremental build state
+*.tsbuildinfo

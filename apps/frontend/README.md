@@ -18,6 +18,20 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Browser Tests
+
+Provision the Chromium binary required by the Storybook browser tests from the repository root:
+
+```bash
+pnpm --filter frontend test:browser:install
+```
+
+Then run the browser tests:
+
+```bash
+pnpm --filter frontend test:storybook
+```
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
